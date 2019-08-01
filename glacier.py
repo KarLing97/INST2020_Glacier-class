@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as rd
 
+#A small unit in a glacier, physical properties of ice
 class Glacier_block:
     def __init__(self, albedo = 0.5, density = 2008, heat_capacity = 0.0053 * 4.184 * 100/10**(2), latent_fusion = 333.55*1000, position = (), temp = 265, debris = (0, 0), snow = (0, 0), mass = 1, mass_change = (), neighbors = (), clock = 0):
         self.albedo = albedo #0.5, https://nsidc.org/cryosphere/seaice/processes/albedo.html
@@ -41,7 +42,8 @@ class Glacier_block:
         
     def set_location(self, pos): #input list of 2
         self.position = pos
-
+        
+    #can be used for interaction between blocks
     def update_neighbors(self, l, r, f, b):
         self.neighbors = l, r, f, b
         
@@ -52,7 +54,8 @@ class Glacier_block:
         else:
             self.debris = [0, 0]
             self.snow = [1, snow_depth]
-
+    
+    #for interaction between blocks
     def mass_loss_dueto_flow(self): #loss 10% of its mass in each cycle
         self.mass -= 0.1 * self.mass #loss to the block one elevation unit below 
         self.mass += 0.1 * neighbors[-1].mass #get mass from the block one elevation unit above                    
@@ -94,7 +97,8 @@ class Glacier_block:
             print('Snow turned into ice!')
         else:
             print('Snow is still snow')
-        
+
+#An array of glacier_blocks
 class Glacier:
 
     def __init__(self, ela = 0, temp_canvas = (), canvas = (), max_ele = 0):
@@ -226,13 +230,14 @@ while glacier_mass[-1] > 0 and ((glacier_mass[-1] - glacier_mass[-2]) >= 1 or (g
             air_temp.append(273)
             change_debris_surface_temp = (1 - soil_albedo) * solar_constant/(density_rock * heatcap_rock)
             change_snow_surface_temp = (1 - snow_albedo) * solar_constant/(density_snow * heatcap_snow)
-            print('day ' + str(change_debris_surface_temp))
+            #print('day ' + str(change_debris_surface_temp))
     else: #night
         air_temp.append(rd.randint(night_temp_min, night_temp_max))
+        
         #Convection between cold air and warmer top of the debris layer
         change_debris_surface_temp = heat_transfer_coefficient_air * (air_temp[-1] - debris_temp_surface[-1])
         change_snow_surface_temp = heat_transfer_coefficient_air * (air_temp[-1] - snow_temp_surface[-1])
-        print('night ' + str(change_debris_surface_temp))
+        #print('night ' + str(change_debris_surface_temp))
             
         debris_temp_surface.append(debris_temp_surface[-1] + change_debris_surface_temp)
         snow_temp_surface.append(snow_temp_surface[-1] + change_snow_surface_temp)
@@ -240,7 +245,7 @@ while glacier_mass[-1] > 0 and ((glacier_mass[-1] - glacier_mass[-2]) >= 1 or (g
         #Step 2: The radiation also heats up the bottom of the debris, but at a factor reduced by the depth
         debris_temp_btm.append(debris_temp_btm[-1] + change_debris_surface_temp/max(debris_depth))
         snow_temp_btm.append(snow_temp_btm[-1] + change_snow_surface_temp/max(snow_depth))
-        print('Finished step 2!')
+        
         #Step 3: Two thermal gradients form. One from the updated surface temperature to the bottom, and another from the botton (which is at ice temperature) to the surface. Take the average as the actual gradient.
     for i in range(len(debris_depth)):
         surface_temp_gradient_debris.append(-thermal_conductivity_of_rock * debris_depth[i] + debris_temp_surface[-1])
@@ -258,7 +263,7 @@ while glacier_mass[-1] > 0 and ((glacier_mass[-1] - glacier_mass[-2]) >= 1 or (g
 
     avg_temp_debris.append(np.average(avg_temp_gradient_debris))
     avg_temp_snow.append(np.average(avg_temp_gradient_snow))
-    print('Finished step 3!')
+    
     #Step 4: Ice temperature increases
     g.update_ice_temp(solar_constant, thermal_conductivity_of_rock, debris_temp_btm, thermal_conductivity_of_snow, snow_temp_btm)
 
