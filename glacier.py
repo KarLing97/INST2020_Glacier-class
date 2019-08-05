@@ -215,7 +215,7 @@ glacier_avg_temp = [0, g.avg_temp()]
 print('Created glacier!')
 
 #Use glacier avg temp to determine continue or stop
-while np.abs(glacier_avg_temp[-1] - glacier_avg_temp[-2]) > 1 * 10**-10:
+while np.abs(glacier_avg_temp[-1] - glacier_avg_temp[-2]) > 1 * 10**-5:
 #Step 1: Update debris and snow surface temp
     if rd.randint(0, 10) < 5: #day
         solar_constant = 1400
